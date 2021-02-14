@@ -80,11 +80,12 @@ if options[:random]
 
     if res.is_a?(Net::HTTPSuccess)
         movies = JSON.parse(res.body)
-        movie = movies[rand(movies.length)]
+        rnd_movie_indx = rand(movies.length)
+        movie = movies[rnd_movie_indx]
 
         puts "# #{movie['title']}"
         if options[:verbose]
-            puts "\n#{movie['synopsis']}\n\n" unless movie['synopsis'].nil?
+            puts "#{movie['synopsis']}\n\n" unless movie['synopsis'].nil?
             puts "directors: #{movie['directors'].join(', ')}" unless movie['directors'].nil?
             puts "cast:      #{movie['cast'].join(', ')}" unless movie['cast'].nil?
             puts "genres:    #{movie['genres'].join(', ')}" unless movie['genres'].nil?
@@ -92,7 +93,7 @@ if options[:random]
             puts "length:    #{movie['duration']/60}min" unless movie['duration'].nil?
             puts
         end
-        puts "#{DRAKEN_HOST}film/#{movie['slug']}"
+        puts "#{DRAKEN_HOST}film/#{movie['slug']}?#{rnd_letter}-#{rnd_movie_indx}"
     else
         puts "[err] msg: #{res}"
     end
