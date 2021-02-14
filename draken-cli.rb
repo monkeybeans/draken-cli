@@ -14,6 +14,10 @@ OptionParser.new do |opts|
   opts.on("-s", "--search", "Perform search") do |o|
     options[:search] = o
   end
+
+  opts.on("-r", "--random", "Random film for you") do |o|
+    options[:random] = o
+  end
 end.parse!
 
 #p options
@@ -57,6 +61,30 @@ if options[:search]
         end
 
         puts "#{}"
+    else
+        puts "[err] msg: #{res}"
+    end
+end
+
+if options[:random]
+    rnd_letter = ('a'..'z').to_a.shuffle[0,1].join
+
+    query = [
+        "_limit=100",
+        "_start=0",
+        #"_sort=title:ASC",
+        "title_contains=#{URI.escape(rnd_letter)}"
+    ].join('&')
+
+    res = api.get("/movies?#{query}")
+
+    if res.is_a?(Net::HTTPSuccess)
+        movies = JSON.parse(res.body)
+        movie = movies[rand(movies.length)]
+
+        puts "** #{movie['title']} **"
+        puts "\n#{movie['synopsis']}\n\n" if options[:verbose]
+        puts "#{DRAKEN_HOST}film/#{movie['slug']}"
     else
         puts "[err] msg: #{res}"
     end
