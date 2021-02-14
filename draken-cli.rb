@@ -82,8 +82,16 @@ if options[:random]
         movies = JSON.parse(res.body)
         movie = movies[rand(movies.length)]
 
-        puts "** #{movie['title']} **"
-        puts "\n#{movie['synopsis']}\n\n" if options[:verbose]
+        puts "# #{movie['title']}"
+        if options[:verbose]
+            puts "\n#{movie['synopsis']}\n\n" unless movie['synopsis'].nil?
+            puts "directors: #{movie['directors'].join(', ')}" unless movie['directors'].nil?
+            puts "cast:      #{movie['cast'].join(', ')}" unless movie['cast'].nil?
+            puts "genres:    #{movie['genres'].join(', ')}" unless movie['genres'].nil?
+            puts "country:   #{movie['countriesOfOrigin'].join(', ')}" unless movie['countriesOfOrigin'].nil?
+            puts "length:    #{movie['duration']/60}min" unless movie['duration'].nil?
+            puts
+        end
         puts "#{DRAKEN_HOST}film/#{movie['slug']}"
     else
         puts "[err] msg: #{res}"
