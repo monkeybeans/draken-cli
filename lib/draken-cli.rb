@@ -20,19 +20,10 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-#p options
-#p ARGV
-
-#https://cms.drakenfilm.se/movies?_limit=42&_start=0&_sort=title:ASC&title_contains=a
-#https://cms.drakenfilm.se/movies?_start=0&_sort=title:ASC"
 DRAKEN_HOST="https://www.drakenfilm.se/"
 
 api = Net::HTTP.new('cms.drakenfilm.se', 443)
 api.use_ssl = true
-
-#args = Hash[ ARGV.join(' ').scan(/--?([^=\s]+)(?:=(\S+))?/) ]args = Hash[ ARGV.join(' ')]
-
-#puts args
 
 if options[:search]
     if ARGV.length == 0
@@ -85,7 +76,7 @@ if options[:random]
 
         puts "# #{movie['title']}"
         if options[:verbose]
-            puts "#{movie['synopsis']}\n\n" unless movie['synopsis'].nil?
+            puts "\n#{movie['synopsis']}\n\n" unless movie['synopsis'].nil?
             puts "directors: #{movie['directors'].join(', ')}" unless movie['directors'].nil?
             puts "cast:      #{movie['cast'].join(', ')}" unless movie['cast'].nil?
             puts "genres:    #{movie['genres'].join(', ')}" unless movie['genres'].nil?
