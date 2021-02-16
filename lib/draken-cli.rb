@@ -44,19 +44,19 @@ def search_movies(match, option)
     api = Net::HTTP.new('cms.drakenfilm.se', 443)
     api.use_ssl = true
     
-    if option[:search_for] == "title"
-        search_for="title_contains"
-    elsif option[:search_for] == "director"
-        search_for="directors_contains"
+    if option[:search_type] == "title"
+        search_type="title_contains"
+    elsif option[:search_type] == "director"
+        search_type="directors_contains"
     else
-        raise "Unknown search_for: #{option[:search_for]}"
+        raise "Unknown search_type: #{option[:search_type]}"
     end
 
     query = [
         "_limit=100",
         "_start=0",
         "_sort=title:ASC",
-        "#{search_for}=#{URI.escape(match)}"
+        "#{search_type}=#{URI.escape(match)}"
     ].join('&')
 
     res = api.get("/movies?#{query}")
@@ -72,7 +72,7 @@ end
 #ttps://cms.drakenfilm.se/movies/count?_limit=42&_start=0&_sort=title:ASC&directors_contains=charlie chaplin
 if options[:search_title]
     search = ARGV.join(' ')
-    movies = search_movies(search, { search_for: "title"})
+    movies = search_movies(search, { search_type: "title"})
 
     movies.each do |movie|
         print_movie(movie, options[:verbose])
@@ -81,7 +81,7 @@ end
 
 if options[:search_director]
     search = ARGV.join(' ')
-    movies = search_movies(search, { search_for: "director"})
+    movies = search_movies(search, { search_type: "director"})
 
     movies.each do |movie|
         print_movie(movie, options[:verbose])
@@ -91,7 +91,7 @@ end
 if options[:random]
     rnd_letter = ('a'..'z').to_a.shuffle[0,1].join
 
-    movies = search_movies(rnd_letter, {})
+    movies = search_movies(rnd_letter, {search_type: "title"})
 
     rnd_movie_indx = rand(movies.length)
     movie = movies[rnd_movie_indx]
