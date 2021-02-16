@@ -11,16 +11,12 @@ OptionParser.new do |opts|
     options[:verbose] = o
   end
 
-  opts.on("-s", "--search", "Perform search") do |o|
-    options[:search] = o
-  end
-
-  opts.on("--search-title", "Perform search") do |o|
-    options[:title] = o
+  opts.on("-s", "--search-title", "Perform search") do |o|
+    options[:search_title] = o
   end
 
   opts.on("--search-director", "Perform search") do |o|
-    options[:directors] = o
+    options[:search_director] = o
   end
 
   opts.on("-r", "--random", "Random film for you") do |o|
@@ -29,9 +25,6 @@ OptionParser.new do |opts|
 end.parse!
 
 DRAKEN_HOST="https://www.drakenfilm.se/"
-
-api = Net::HTTP.new('cms.drakenfilm.se', 443)
-api.use_ssl = true
 
 def print_movie(movie, verbose)
     puts "# #{movie['title']}"
@@ -47,52 +40,61 @@ def print_movie(movie, verbose)
     puts "#{DRAKEN_HOST}film/#{movie['slug']}"
 end
 
-#ttps://cms.drakenfilm.se/movies/count?_limit=42&_start=0&_sort=title:ASC&directors_contains=charlie chaplin
-if options[:search]
-    if ARGV.length == 0
-        puts "Missing search query"
-        return
+def search_movies(match, option)
+    api = Net::HTTP.new('cms.drakenfilm.se', 443)
+    api.use_ssl = true
+    
+    if option[:search_for] == "title"
+        search_for="title_contains"
+    elsif option[:search_for] == "director"
+        search_for="directors_contains"
+    else
+        raise "Unknown search_for: #{option[:search_for]}"
     end
-    search = ARGV.join(' ')
+
     query = [
         "_limit=100",
         "_start=0",
         "_sort=title:ASC",
-        #"title_contains=#{URI.escape(search)}"
-        "directors_contains=#{URI.escape(search)}"
+        "#{search_for}=#{URI.escape(match)}"
     ].join('&')
 
     res = api.get("/movies?#{query}")
 
     if res.is_a?(Net::HTTPSuccess)
-        movies = JSON.parse(res.body)
-        movies.each do |movie|
-            print_movie(movie, options[:verbose])
-        end
+        return JSON.parse(res.body)
     else
         puts "[err] msg: #{res}"
+        return {}
+    end
+end
+
+#ttps://cms.drakenfilm.se/movies/count?_limit=42&_start=0&_sort=title:ASC&directors_contains=charlie chaplin
+if options[:search_title]
+    search = ARGV.join(' ')
+    movies = search_movies(search, { search_for: "title"})
+
+    movies.each do |movie|
+        print_movie(movie, options[:verbose])
+    end
+end
+
+if options[:search_director]
+    search = ARGV.join(' ')
+    movies = search_movies(search, { search_for: "director"})
+
+    movies.each do |movie|
+        print_movie(movie, options[:verbose])
     end
 end
 
 if options[:random]
     rnd_letter = ('a'..'z').to_a.shuffle[0,1].join
 
-    query = [
-        "_limit=100",
-        "_start=0",
-        #"_sort=title:ASC",
-        "title_contains=#{URI.escape(rnd_letter)}"
-    ].join('&')
+    movies = search_movies(rnd_letter, {})
 
-    res = api.get("/movies?#{query}")
+    rnd_movie_indx = rand(movies.length)
+    movie = movies[rnd_movie_indx]
 
-    if res.is_a?(Net::HTTPSuccess)
-        movies = JSON.parse(res.body)
-        rnd_movie_indx = rand(movies.length)
-        movie = movies[rnd_movie_indx]
-
-        print_movie(movie, options[:verbose])
-    else
-        puts "[err] msg: #{res}"
-    end
+    print_movie(movie, options[:verbose])
 end
