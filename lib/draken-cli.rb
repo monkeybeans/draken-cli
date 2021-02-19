@@ -26,10 +26,38 @@ end.parse!
 
 DRAKEN_HOST="https://www.drakenfilm.se/"
 
+def fmt_text(text, width=65)
+    fmt_text=""
+    current_width=0
+
+    if text.nil?
+        return fmt_text
+    end
+
+    text.each_char do |c|
+        current_width += 1
+        if c == "\n"
+            fmt_text+=c
+            current_width = 0
+            next
+        end
+
+        if current_width >= width && c == " "
+            fmt_text+="\n"
+            current_width = 0
+        else 
+            fmt_text+=c
+        end
+    end
+
+    return fmt_text
+end
+
 def print_movie(movie, verbose)
     puts "# #{movie['title']}"
     if verbose
-        puts "\n#{movie['synopsis']}\n\n" unless movie['synopsis'].nil?
+        fmt_synopsis=fmt_text(movie['synopsis'])
+        puts "\n#{fmt_synopsis}\n\n" unless movie['synopsis'].nil?
         puts "directors: #{movie['directors'].join(', ')}" unless movie['directors'].nil?
         puts "cast:      #{movie['cast'].join(', ')}" unless movie['cast'].nil?
         puts "genres:    #{movie['genres'].join(', ')}" unless movie['genres'].nil?
