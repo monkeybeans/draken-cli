@@ -5,7 +5,7 @@ require 'optparse'
 
 options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: example.rb [options]"
+  opts.banner = "Usage: draken-cli [options]"
 
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |o|
     options[:verbose] = o
@@ -58,8 +58,11 @@ def fmt_text(text, width=65)
 end
 
 def print_movie(movie, verbose)
-    puts "# #{movie['title']}"
+    title=movie['title']
+    url="#{DRAKEN_HOST}film/#{URI.escape(movie['slug'])}"
+
     if verbose
+        puts "### #{title} ###"
         fmt_synopsis=fmt_text(movie['synopsis'])
         puts "\n#{fmt_synopsis}\n\n" unless movie['synopsis'].nil?
         puts "directors: #{movie['directors'].join(', ')}" unless movie['directors'].nil?
@@ -68,8 +71,12 @@ def print_movie(movie, verbose)
         puts "country:   #{movie['countriesOfOrigin'].join(', ')}" unless movie['countriesOfOrigin'].nil?
         puts "length:    #{movie['duration']/60}min" unless movie['duration'].nil?
         puts
+        puts url
+        puts
+        puts
+    else
+        printf("# %-35s %s\n", title, url)
     end
-    puts "#{DRAKEN_HOST}film/#{URI.escape(movie['slug'])}"
 end
 
 def search_movies(match, option)
