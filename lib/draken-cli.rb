@@ -65,7 +65,7 @@ def print_movie(movie, verbose)
         puts "length:    #{movie['duration']/60}min" unless movie['duration'].nil?
         puts
     end
-    puts "#{DRAKEN_HOST}film/#{movie['slug']}"
+    puts "#{DRAKEN_HOST}film/#{URI.escape(movie['slug'])}"
 end
 
 def search_movies(match, option)
