@@ -19,6 +19,10 @@ OptionParser.new do |opts|
     options[:search_director] = o
   end
 
+  opts.on("--list-by-genre", "List for: action,animation,biografi,dokumentär,drama,fantasy,komedi,musik,mystik,science fiction,skräck,thriller,äventyr") do |o|
+    options[:list_by_genre] = o
+  end
+
   opts.on("-r", "--random", "Random film for you") do |o|
     options[:random] = o
   end
@@ -76,8 +80,10 @@ def search_movies(match, option)
         search_type="title_contains"
     elsif option[:search_type] == "director"
         search_type="directors_contains"
+    elsif option[:list_type] == "genre"
+        search_type="genres_contains"
     else
-        raise "Unknown search_type: #{option[:search_type]}"
+        raise "Unknown option: #{option}"
     end
 
     query = [
@@ -110,6 +116,15 @@ end
 if options[:search_director]
     search = ARGV.join(' ')
     movies = search_movies(search, { search_type: "director"})
+
+    movies.each do |movie|
+        print_movie(movie, options[:verbose])
+    end
+end
+
+if options[:list_by_genre]
+    search = ARGV.join(' ')
+    movies = search_movies(search, { list_type: "genre"})
 
     movies.each do |movie|
         print_movie(movie, options[:verbose])
