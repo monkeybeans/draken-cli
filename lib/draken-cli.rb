@@ -2,6 +2,7 @@
 require 'net/http'
 require 'json'
 require 'optparse'
+require 'cgi'
 
 ARGV << '-h' if ARGV.empty?
 
@@ -67,7 +68,7 @@ end
 
 def print_movie(movie, verbose)
     title=movie['title']
-    url="#{DRAKEN_HOST}film/#{URI.escape(movie['slug'])}"
+    url="#{DRAKEN_HOST}film/#{CGI.escape(movie['slug'])}"
 
     if verbose
         puts "### #{title} ###"
@@ -105,7 +106,7 @@ def search_movies(match, option)
         "_limit=100",
         "_start=0",
         "_sort=title:ASC",
-        "#{search_type}=#{URI.escape(match)}",
+        "#{search_type}=#{CGI.escape(match)}",
     ].join('&')
 
     res = api.get("/movies?#{query}")
