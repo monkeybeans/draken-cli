@@ -3,10 +3,7 @@ require 'net/http'
 require 'json'
 require 'optparse'
 
-if ARGV.length == 0
-    puts "Missing arguments, see --help"
-    exit 1
-end
+ARGV << '-h' if ARGV.empty?
 
 options = {}
 begin
@@ -21,12 +18,12 @@ begin
             options[:search_title] = o
         end
 
-        opts.on("--search-director DIRECTOR", "Perform search") do |o|
+        opts.on("-d", "--search-director DIRECTOR", "Perform search") do |o|
             options[:search_director] = o
         end
 
         genres = ["action","animation","biografi","dokumentär","drama","fantasy","komedi","musik","mystik","science fiction","skräck","thriller","äventyr"]
-        opts.on("--list-by-genre GENRE", "List for: #{genres.join(' ')}") do |o|
+        opts.on("-l", "--list-by-genre GENRE", "List for: #{genres.join('|')}") do |o|
             options[:list_by_genre] = o
         end
 
@@ -108,7 +105,7 @@ def search_movies(match, option)
         "_limit=100",
         "_start=0",
         "_sort=title:ASC",
-        "#{search_type}=#{URI.escape(match)}"
+        "#{search_type}=#{URI.escape(match)}",
     ].join('&')
 
     res = api.get("/movies?#{query}")
