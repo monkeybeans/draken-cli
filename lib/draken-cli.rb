@@ -3,30 +3,41 @@ require 'net/http'
 require 'json'
 require 'optparse'
 
+if ARGV.length == 0
+    puts "Missing arguments, see --help"
+    exit 1
+end
+
 options = {}
-OptionParser.new do |opts|
-  opts.banner = "Usage: draken-cli [options]"
+begin
+    OptionParser.new do |opts|
+        opts.banner = "Usage: draken-cli [options]"
 
-  opts.on("-v", "--[no-]verbose", "Run verbosely") do |o|
-    options[:verbose] = o
-  end
+        opts.on("-v", "--verbose", "Run verbosely") do |o|
+            options[:verbose] = o
+        end
 
-  opts.on("-s", "--search-title", "Perform search") do |o|
-    options[:search_title] = o
-  end
+        opts.on("-s", "--search-title TITLE", "Perform search") do |o|
+            options[:search_title] = o
+        end
 
-  opts.on("--search-director", "Perform search") do |o|
-    options[:search_director] = o
-  end
+        opts.on("--search-director DIRECTOR", "Perform search") do |o|
+            options[:search_director] = o
+        end
 
-  opts.on("--list-by-genre", "List for: action,animation,biografi,dokumentär,drama,fantasy,komedi,musik,mystik,science fiction,skräck,thriller,äventyr") do |o|
-    options[:list_by_genre] = o
-  end
+        genres = ["action","animation","biografi","dokumentär","drama","fantasy","komedi","musik","mystik","science fiction","skräck","thriller","äventyr"]
+        opts.on("--list-by-genre GENRE", "List for: #{genres.join(' ')}") do |o|
+            options[:list_by_genre] = o
+        end
 
-  opts.on("-r", "--random", "Random film for you") do |o|
-    options[:random] = o
-  end
-end.parse!
+        opts.on("-r", "--random", "Random film for you") do |o|
+            options[:random] = o
+        end
+    end.parse!
+rescue OptionParser::MissingArgument => e
+    puts e
+    exit 1
+end
 
 DRAKEN_HOST="https://www.drakenfilm.se/"
 
@@ -111,8 +122,8 @@ def search_movies(match, option)
 end
 
 #ttps://cms.drakenfilm.se/movies/count?_limit=42&_start=0&_sort=title:ASC&directors_contains=charlie chaplin
-if options[:search_title]
-    search = ARGV.join(' ')
+if options.has_key? :search_title
+    search = options[:search_title]
     movies = search_movies(search, { search_type: "title"})
 
     movies.each do |movie|
@@ -120,8 +131,8 @@ if options[:search_title]
     end
 end
 
-if options[:search_director]
-    search = ARGV.join(' ')
+if options.has_key? :search_director
+    search = options[:search_director]
     movies = search_movies(search, { search_type: "director"})
 
     movies.each do |movie|
@@ -129,8 +140,8 @@ if options[:search_director]
     end
 end
 
-if options[:list_by_genre]
-    search = ARGV.join(' ')
+if options.has_key? :list_by_genre
+    search = options[:list_by_genre]
     movies = search_movies(search, { list_type: "genre"})
 
     movies.each do |movie|
